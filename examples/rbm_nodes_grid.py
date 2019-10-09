@@ -145,7 +145,7 @@ space = {
 def objective(params):
     for x in params.keys(): # if "units1":0 add one -> units1:1
         if params[x] == 0:
-            params[x] = 1
+            params[x] = 5
     K.clear_session()
 
     args.n_hidden = int(params['units1'])
