@@ -6,7 +6,7 @@ import numpy as np
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import exhaustive_search
 import os
-
+"""
 def run_trials(script_name, space, objective):
 
     trials_step = 1  # how many additional trials to do after loading saved trials. 1 = save after iteration
@@ -29,7 +29,7 @@ def run_trials(script_name, space, objective):
     with open("trials/" + script_name, "wb") as f:
         pickle.dump(trials, f)
 
-
+"""
 def run_trials_grid(script_name, space, objective):
 
     exhaustive_search.validate_space_exhaustive_search(space)
