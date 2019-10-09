@@ -131,7 +131,7 @@ script_name = os.path.basename(__file__).split('.')[0]
 X_train, X_val, X_test = generate_data.generate_data_medium_2()
 
 space = {
-    'units1': hp.quniform('units1', 0, 784, 10), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
+    'units1': hp.quniform('units1', 0, 754, 10), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
     'batch_size': hp.choice('batch_size', [128])
     }
 
@@ -144,8 +144,7 @@ space = {
 
 def objective(params):
     for x in params.keys(): # if "units1":0 add one -> units1:1
-        if params[x] == 0:
-            params[x] = 5
+            params[x] = params[x] + 30
     K.clear_session()
 
     args.n_hidden = int(params['units1'])
