@@ -14,7 +14,7 @@ def generate_data_huge():
     x_test = np.clip(x_test, 0., 1.).astype('float32')
     x_val = x_train[-1000:]
     x_train = x_train[:49000]
-    x_test = x_test[:1000]
+    x_test = x_test[:2000]
     return x_train, x_val, x_test
 def generate_data_big():
     (x_train,_), (x_test,_) = mnist.load_data()
@@ -29,7 +29,7 @@ def generate_data_big():
     x_test = np.clip(x_test, 0., 1.).astype('float32')
     x_val = x_train[-1000:]
     x_train = x_train[:25000]
-    x_test = x_test[:1000]
+    x_test = x_test[:2000]
     return x_train, x_val, x_test
 
 def generate_data_medium_2():
@@ -45,7 +45,7 @@ def generate_data_medium_2():
     x_test = np.clip(x_test, 0., 1.).astype('float32')
     x_val = x_train[-1000:]
     x_train = x_train[:10000]
-    x_test = x_test[:9000]
+    x_test = x_test[:2000]
     return x_train, x_val, x_test
 
 def generate_data_medium():
@@ -59,9 +59,9 @@ def generate_data_medium():
     x_test = x_test + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_test.shape)
     x_train = np.clip(x_train, 0., 1.).astype('float32')
     x_test = np.clip(x_test, 0., 1.).astype('float32')
-    x_val = x_train[-1000:]
+    x_val = x_train[-5000:]
     x_train = x_train[:5000]
-    x_test = x_test[:1000]
+    x_test = x_test[:2000]
     return x_train, x_val, x_test
 
 
@@ -77,7 +77,7 @@ def generate_data_small():
     x_test = x_test + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_test.shape)
     x_train = np.clip(x_train, 0., 1.).astype('float32')
     x_test = np.clip(x_test, 0., 1.).astype('float32')
-    x_val = x_train[-1000:]
+    x_val = x_train[-100:]
     x_train = x_train[:1000]
     x_test = x_test[:1000]
     return x_train, x_val, x_test
@@ -93,7 +93,7 @@ def generate_data_tiny():
     x_test = x_test + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_test.shape)
     x_train = np.clip(x_train, 0., 1.).astype('float32')
     x_test = np.clip(x_test, 0., 1.).astype('float32')
-    x_val = x_train[-1000:]
+    x_val = x_train[-50:]
     x_train = x_train[:500]
     x_test = x_test[:1000]
     return x_train, x_val, x_test
@@ -113,3 +113,4 @@ def generate_data_micro():
     x_train = x_train[:100]
     x_test = x_test[:1000]
     return x_train, x_val, x_test
+
