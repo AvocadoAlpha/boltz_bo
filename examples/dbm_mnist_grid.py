@@ -216,15 +216,15 @@ X_train, X_val, X_test = generate_data.generate_data_medium_2()
 X = np.concatenate((X_train, X_val))
 
 space = {
-    'units1': hp.quniform('units1', 0, 100, 4), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
-    'units2': hp.quniform('units2', 0, 100, 4), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
+    'units1': hp.quniform('units1', 0, 100, 5), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
+    'units2': hp.quniform('units2', 0, 100, 5), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
     'batch_size': hp.choice('batch_size', [128])
     }
 
 space_str = """
 space = {
-    'units1': hp.quniform('units1', 0, 100, 4), 
-    'units2': hp.quniform('units2', 0, 100, 4), 
+    'units1': hp.quniform('units1', 0, 100, 5), 
+    'units2': hp.quniform('units2', 0, 100, 5), 
     'batch_size': hp.choice('batch_size', [128])
     }"""
 
