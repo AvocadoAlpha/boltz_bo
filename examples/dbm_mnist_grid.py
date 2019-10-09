@@ -145,8 +145,7 @@ def make_dbm((X_train, X_val), rbms, (Q, G), args):
               display_particles=20,
               v_shape=(28, 28),
               dtype='float32',
-              tf_saver_params=dict(max_to_keep=1),
-              model_path=args.dbm_dirpath)
+              tf_saver_params=dict(max_to_keep=1))
     dbm.fit(X_train, X_val)
     return dbm
 

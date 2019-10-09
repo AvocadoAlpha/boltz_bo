@@ -163,7 +163,7 @@ def main():
                         help='number of Gibbs updates per weights update or sequence of such (per epoch)')
     parser.add_argument('--lr', type=float, default=0.05, metavar='LR', nargs='+',
                         help='learning rate or sequence of such (per epoch)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument('--epochs', type=int, default=120, metavar='N',
                         help='number of epochs to train')
     parser.add_argument('--batch-size', type=int, default=10, metavar='B',
                         help='input batch size for training')
@@ -223,7 +223,7 @@ def main():
     X_test, y_test = load_mnist(mode='test', path=args.data_path)
     X_test /= 255.
 
-    X_train, X_val, X_test = generate_data.generate_data_tiny()
+    X_train, X_val, X_test = generate_data.generate_data_medium_2()
 
     # train and save the RBM model
     rbm = make_rbm(X_train, X_val, args)
