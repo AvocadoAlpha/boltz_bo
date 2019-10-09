@@ -25,20 +25,23 @@ Links
 """
 print __doc__
 
-print __doc__
-import env
-from keras import backend as K
-import generate_data
-import boptimization
-from hyperopt import hp, STATUS_OK
 import os
 import argparse
 import numpy as np
-import tensorflow as tf
-from keras.losses import mean_squared_error
+from keras import regularizers
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.initializers import glorot_uniform
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+from sklearn.metrics import accuracy_score
+
 import env
 from boltzmann_machines import DBM
 from boltzmann_machines.rbm import BernoulliRBM
+from boltzmann_machines.utils import (RNG, Stopwatch,
+                                      one_hot, one_hot_decision_function, unhot)
+from boltzmann_machines.utils.dataset import load_mnist
+from boltzmann_machines.utils.optimizers import MultiAdam
 
 
 def make_rbm1(X, args):
@@ -118,7 +121,8 @@ def make_rbm2(Q, args):
     return rbm2
 
 def make_dbm((X_train, X_val), rbms, (Q, G), args):
-    print "\nMake dbm #2 ...\n\n"
+
+    print "\nTraining DBM ...\n\n"
     dbm = DBM(rbms=rbms,
               n_particles=args.n_particles,
               v_particle_init=X_train[:args.n_particles].copy(),
@@ -152,6 +156,7 @@ def make_dbm((X_train, X_val), rbms, (Q, G), args):
     return dbm
 
 
+
 # training settings
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -168,13 +173,13 @@ parser.add_argument('--increase-n-gibbs-steps-every', type=int, default=20, meta
                     help='increase number of Gibbs steps every specified number of epochs for RBM #2')
 
 # common for RBMs and DBM
-parser.add_argument('--n-hiddens', type=int, default=(200, 30), metavar='N', nargs='+',
+parser.add_argument('--n-hiddens', type=int, default=(50, 30), metavar='N', nargs='+',
                     help='numbers of hidden units')
 parser.add_argument('--n-gibbs-steps', type=int, default=(1, 1, 1), metavar='N', nargs='+',
                     help='(initial) number of Gibbs steps for CD/PCD')
 parser.add_argument('--lr', type=float, default=(0.05, 0.01, 2e-3), metavar='LR', nargs='+',
                     help='(initial) learning rates')
-parser.add_argument('--epochs', type=int, default=(0, 0, 0), metavar='N', nargs='+',
+parser.add_argument('--epochs', type=int, default=(15, 20, 30), metavar='N', nargs='+',
                     help='number of epochs to train')
 parser.add_argument('--batch-size', type=int, default=(48, 48, 100), metavar='B', nargs='+',
                     help='input batch size for training, `--n-train` and `--n-val`' + \
@@ -191,6 +196,7 @@ parser.add_argument('--rbm2-dirpath', type=str, default='../models/dbm_mnist_rbm
                     help='directory path to save RBM #2')
 parser.add_argument('--dbm-dirpath', type=str, default='../models/dbm_mnist/', metavar='DIRPATH',
                     help='directory path to save DBM')
+
 # DBM related
 parser.add_argument('--n-particles', type=int, default=100, metavar='M',
                     help='number of persistent Markov chains')
@@ -207,67 +213,81 @@ parser.add_argument('--sparsity-cost', type=float, default=(1e-4, 5e-5), metavar
 parser.add_argument('--sparsity-damping', type=float, default=0.9, metavar='D',
                     help='decay rate for hidden activations probs')
 
+# MLP related
+parser.add_argument('--mlp-no-init', action='store_true',
+                    help='if enabled, use random initialization')
+parser.add_argument('--mlp-l2', type=float, default=1e-5, metavar='L2',
+                    help='L2 weight decay coefficient')
+parser.add_argument('--mlp-lrm', type=float, default=(0.01, 0.1, 1.), metavar='LRM', nargs='+',
+                    help='learning rate multipliers of 1e-3')
+parser.add_argument('--mlp-epochs', type=int, default=100, metavar='N',
+                    help='number of epochs to train')
+parser.add_argument('--mlp-val-metric', type=str, default='val_acc', metavar='S',
+                    help="metric on validation set to perform early stopping, {'val_acc', 'val_loss'}")
+parser.add_argument('--mlp-batch-size', type=int, default=128, metavar='N',
+                    help='input batch size for training')
+parser.add_argument('--mlp-save-prefix', type=str, default='../data/dbm_', metavar='PREFIX',
+                    help='prefix to save MLP predictions and targets')
 
 # parse and check params
 args = parser.parse_args()
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-script_name = os.path.basename(__file__).split('.')[0]
-X_train, X_val, X_test = generate_data.generate_data_medium_2()
+for x, m in (
+    (args.n_gibbs_steps, 3),
+    (args.lr, 3),
+    (args.epochs, 3),
+    (args.batch_size, 3),
+    (args.l2, 3),
+    (args.random_seed, 3),
+    (args.sparsity_target, 2),
+    (args.sparsity_cost, 2),
+    (args.mlp_lrm, 3),
+):
+    if len(x) == 1:
+        x *= m
+
+# prepare data (load + scale + split)
+print "\nPreparing data ...\n\n"
+X, y = load_mnist(mode='train', path='../data/')
+X /= 255.
+RNG(seed=42).shuffle(X)
+RNG(seed=42).shuffle(y)
+n_train = min(len(X), args.n_train)
+n_val = min(len(X), args.n_val)
+X_train = X[:n_train]
+y_train = y[:n_train]
+X_val = X[-n_val:]
+y_val = y[-n_val:]
 X = np.concatenate((X_train, X_val))
+X_test, y_test = load_mnist(mode='test', path='../data/')
+X_test /= 255.
+# pre-train RBM #1
+rbm1 = make_rbm1(X, args)
 
-space = {
-    'units1': hp.quniform('units1', 0, 100, 4), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
-    'units2': hp.quniform('units2', 0, 100, 4), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
-    'batch_size': hp.choice('batch_size', [128])
-    }
-
-space_str = """
-space = {
-    'units1': hp.quniform('units1', 0, 100, 4), 
-    'units2': hp.quniform('units2', 0, 100, 4), 
-    'batch_size': hp.choice('batch_size', [128])
-    }"""
-
-def objective(params):
-    for x in params.keys(): # if "units1":0 add one -> units1:1
-        if params[x] == 0:
-            params[x] = 1
-    K.clear_session()
-
-    layer1 = int(np.ceil((params['units1'] / 100) * 784))
-    layer2 = int(np.ceil((params['units2'] / 100) * layer1))
-    args.n_hiddens = (layer1, layer2)
-    print("Params :")
-    print("Params :" + str(layer1))
-    print("Params :" + str(layer2))
-    # pre-train RBM #1
-    rbm1 = make_rbm1(X, args)
-
-    # freeze RBM #1 and extract features Q = p_{RBM_1}(h|v=X)
+# freeze RBM #1 and extract features Q = p_{RBM_1}(h|v=X)
+Q = None
+if not os.path.isdir(args.rbm2_dirpath) or not os.path.isdir(args.dbm_dirpath):
+    print "\nExtracting features from RBM #1 ..."
     Q = rbm1.transform(X)
+    print "\n"
 
+# pre-train RBM #2
+rbm2 = make_rbm2(Q, args)
 
-    # pre-train RBM #2
-    rbm2 = make_rbm2(Q, args)
-
-    # freeze RBM #2 and extract features G = p_{RBM_2}(h|v=Q)
+# freeze RBM #2 and extract features G = p_{RBM_2}(h|v=Q)
+G = None
+if not os.path.isdir(args.dbm_dirpath):
+    print "\nExtracting features from RBM #2 ..."
     G = rbm2.transform(Q)
+    print "\n"
 
-    # jointly train DBM
-    dbm = make_dbm((X_train, X_val), (rbm1, rbm2), (Q, G), args)
+# jointly train DBM
+dbm = make_dbm((X_train, X_val), (rbm1, rbm2), (Q, G), args)
 
-
-    predictions = dbm.reconstruct(X_test)
-    print(predictions)
-
-    loss = tf.keras.backend.sum(mean_squared_error(tf.convert_to_tensor(X_test), tf.convert_to_tensor(predictions)))
-    sess = tf.Session()
-    score = round(sess.run(loss) / len(X_test), 4)
-    print(score)
-    return {'loss': score, 'status': STATUS_OK}
+# load test data
+X_test, y_test = load_mnist(mode='test', path='../data/')
+X_test /= 255.
 
 
-while True:
-    boptimization.run_trials_grid_2(script_name, space, objective)
 
 
