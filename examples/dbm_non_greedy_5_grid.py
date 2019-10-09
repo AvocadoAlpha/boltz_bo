@@ -316,5 +316,5 @@ def objective(params):
 
 
 while True:
-    boptimization.run_trials(script_name, space, objective)
+    boptimization.run_trials_grid_2(script_name, space, objective)
 
