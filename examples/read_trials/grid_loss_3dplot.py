@@ -16,9 +16,9 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
 
-openF = "dbm_grid"#sys.argv[1]
+openF = "rbm_nodes_grid"#sys.argv[1]
 xaxe = "units1"#sys.argv[2]
-module = importlib.import_module(openF)
+module = importlib.import_module("examples."+openF, "examples")
 init(openF)
 header = "\ntrain: "+str(len(module.X_train)) + "\nval: " + str(len(module.X_val)) + "\ntest: "+str(len(module.X_test))+"\n"
 

@@ -23,7 +23,9 @@ Links
 -----
 [1] http://www.cs.toronto.edu/~rsalakhu/DBM.html
 """
+from __future__ import division
 print __doc__
+
 
 print __doc__
 import env
@@ -229,13 +231,13 @@ parser.add_argument('--random-seed', type=int, default=(1337, 1111, 2222), metav
                     help='random seeds for models training')
 
 # save dirpaths
-parser.add_argument('--rbm1-dirpath', type=str, default='../models/dbm_mnist_rbm1/', metavar='DIRPATH',
+parser.add_argument('--rbm1-dirpath', type=str, default='../models/fixed/dbm_mnist_rbm1_fixed_5/', metavar='DIRPATH',
                     help='directory path to save RBM #1')
-parser.add_argument('--rbm2-dirpath', type=str, default='../models/dbm_mnist_rbm2/', metavar='DIRPATH',
+parser.add_argument('--rbm2-dirpath', type=str, default='../models/fixed/dbm_mnist_rbm2_fixed_5/', metavar='DIRPATH',
                     help='directory path to save RBM #2')
-parser.add_argument('--rbm3-dirpath', type=str, default='../models/dbm_mnist_rbm3/', metavar='DIRPATH',
+parser.add_argument('--rbm3-dirpath', type=str, default='../models/fixed/dbm_mnist_rbm3_fixed_5/', metavar='DIRPATH',
                     help='directory path to save RBM #3')
-parser.add_argument('--dbm-dirpath', type=str, default='../models/dbm_mnist/', metavar='DIRPATH',
+parser.add_argument('--dbm-dirpath', type=str, default='../models/fixed/dbm_mnist_fixed_5/', metavar='DIRPATH',
                     help='directory path to save DBM')
 
 # DBM related
@@ -281,7 +283,6 @@ def objective(params):
         if params[x] == 0:
             params[x] = 5
     K.clear_session()
-
     layer1 = int(np.ceil((params['units1'] / 100) * 784))
     layer2 = max(int(np.ceil((params['units2'] / 100) * layer1)), 24)
     layer3 = max(int(np.ceil((params['units3'] / 100) * layer2)), 24)
@@ -320,8 +321,9 @@ def objective(params):
     print(score)
     return {'loss': score, 'status': STATUS_OK}
 
+if __name__ == "__main__":
+    while True:
+        boptimization.run_trials_grid_2(script_name, space, objective)
 
-while True:
-    boptimization.run_trials_grid_2(script_name, space, objective)
 
 

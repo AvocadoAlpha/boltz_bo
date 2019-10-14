@@ -23,6 +23,7 @@ Links
 -----
 [1] http://www.cs.toronto.edu/~rsalakhu/DBM.html
 """
+from __future__ import division
 print __doc__
 
 print __doc__
@@ -185,11 +186,11 @@ parser.add_argument('--random-seed', type=int, default=(1337, 1111, 2222), metav
                     help='random seeds for models training')
 
 # save dirpaths
-parser.add_argument('--rbm1-dirpath', type=str, default='../models/dbm_mnist_rbm1/', metavar='DIRPATH',
+parser.add_argument('--rbm1-dirpath', type=str, default='../models/dbm_mnist_rbm1_grid/', metavar='DIRPATH',
                     help='directory path to save RBM #1')
-parser.add_argument('--rbm2-dirpath', type=str, default='../models/dbm_mnist_rbm2/', metavar='DIRPATH',
+parser.add_argument('--rbm2-dirpath', type=str, default='../models/dbm_mnist_rbm2_grid/', metavar='DIRPATH',
                     help='directory path to save RBM #2')
-parser.add_argument('--dbm-dirpath', type=str, default='../models/dbm_mnist/', metavar='DIRPATH',
+parser.add_argument('--dbm-dirpath', type=str, default='../models/dbm_mnist_grid/', metavar='DIRPATH',
                     help='directory path to save DBM')
 # DBM related
 parser.add_argument('--n-particles', type=int, default=100, metavar='M',
@@ -266,8 +267,8 @@ def objective(params):
     print(score)
     return {'loss': score, 'status': STATUS_OK}
 
-
-while True:
-    boptimization.run_trials_grid_2(script_name, space, objective)
+if __name__ == "__main__":
+    while True:
+        boptimization.run_trials_grid_2(script_name, space, objective)
 
 

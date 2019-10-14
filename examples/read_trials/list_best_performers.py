@@ -17,7 +17,7 @@ def init(openF1):
     global openF
     openF = openF1
     global module
-    module = importlib.import_module(openF1)
+    module = importlib.import_module("examples."+openF1)
     global trials
     trials = pickle.load(open('../trials/'+ openF1, "rb"))
     global res
@@ -112,6 +112,7 @@ def fixed_5():
 
 options = { "grid_batch" : nodes_batch,
             "grid_nodes" :nodes_batch,
+            "rbm_nodes_grid": nodes_batch,
             "grid_nodes_100" :nodes_batch,
             "grid_nodes_3" :nodes_batch,
             "grid_nodes_keras":nodes_batch,

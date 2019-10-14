@@ -137,7 +137,7 @@ space = {
 
 space_str = """
 space = {
-    'units1': hp.quniform('units1', 0, 784, 10), 
+    'units1': hp.quniform('units1', 0, 754, 10), 
     'batch_size': hp.choice('batch_size', [128])
     }"""
 
@@ -160,7 +160,7 @@ def objective(params):
     print(score)
     return {'loss': score, 'status': STATUS_OK}
 
-
-while True:
-    boptimization.run_trials_grid_2(script_name, space, objective)
+if __name__ == "__main__":
+    while True:
+        boptimization.run_trials_grid_2(script_name, space, objective)
 

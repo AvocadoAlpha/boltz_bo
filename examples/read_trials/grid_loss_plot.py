@@ -9,12 +9,12 @@ from hyperopt import space_eval
 import utils
 
 
-openF = "grid_nodes"#sys.argv[1]
+openF = "rbm_nodes_grid"#sys.argv[1]
 
 xaxe = "units1"#sys.argv[2]
-module = importlib.import_module(openF)
+module = importlib.import_module("examples."+openF)
 init(openF)
-header = "\ntrain: "+str(len(module.x_train)) + "\nval: " + str(len(module.x_val)) + "\ntest: "+str(len(module.x_test))+"\n"
+header = "\ntrain: "+str(len(module.X_train)) + "\nval: " + str(len(module.X_val)) + "\ntest: "+str(len(module.X_test))+"\n"
 
 
 
@@ -36,20 +36,20 @@ def normalize(a, amin):
     return a, amax
 
 
-trials = pickle.load(open('../../trials/'+ openF, "rb"))
+trials = pickle.load(open('../trials/'+ openF, "rb"))
 res = trials.trials
 
-y = [x['result']['loss'] for x in res]
-first_timestamp = res[0]['book_time'].timestamp()
-x, amax = normalize([round(x['refresh_time'].timestamp(), 1) for x in res], first_timestamp)
+#y = [x['result']['loss'] for x in res]
+#first_timestamp = res[0]['book_time'].timestamp()
+#x, amax = normalize([round(x['refresh_time'].timestamp(), 1) for x in res], first_timestamp)
 
 
 table, n = options[openF]()
 #sorted_table = sorted(table, key=lambda k: k['batch_size'])
 
 
-x = [x[xaxe] for x in table] #populate graph!
-y = [x['loss'] for x in table]
+x = [t[xaxe] for t in table] #populate graph!
+y = [t['loss'] for t in table]
 """
 x = [x['units1'] for x in table]
 y = [x['loss'] for x in table]
@@ -59,14 +59,14 @@ y = [x['loss'] for x in table]
 
 
 from datetime import datetime
-total_seconds = (datetime.fromtimestamp(amax) - res[0]['book_time']).total_seconds()
-total_time = "Total Time in hours :" + str((total_seconds/60)/60) + '\n'
-nOE = total_time + "Number of Evaluations :" + str(len(trials.trials)) + '\n'
+#total_seconds = (datetime.fromtimestamp(amax) - res[0]['book_time']).total_seconds()
+#total_time = "Total Time in hours :" + str((total_seconds/60)/60) + '\n'
+nOE = "Number of Evaluations :" + str(len(trials.trials)) + '\n'
 best = str(my_space_eval(trials.best_trial['misc']['vals']))+" Result :"+str(trials.best_trial['result'])
 fig, ax = plt.subplots()
 space = module.space
 text = '\n' + nOE + "Best: " + best + '\n' + module.space_str + '\n'
-ax.margins(x=-0.001)
+#ax.margins(x=-0.001)
 ax.set_title(openF+header+text, loc='left')
 ax.set_xlabel(xaxe, fontsize=16)
 ax.set_ylabel("loss", fontsize=16)
