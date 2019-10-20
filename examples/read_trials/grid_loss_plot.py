@@ -9,7 +9,7 @@ from hyperopt import space_eval
 import utils
 
 
-openF = "rbm_nodes_grid"#sys.argv[1]
+openF = "dbm_grid"#sys.argv[1]
 
 xaxe = "units1"#sys.argv[2]
 module = importlib.import_module("examples."+openF)
