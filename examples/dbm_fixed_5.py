@@ -272,11 +272,14 @@ space = {
     }
 
 space_str = """
-space = {
-    'units1': hp.quniform('units1', 0, 100, 5), 
-    'units2': hp.quniform('units2', 0, 100, 5), 
+space ={
+    'units1': hp.quniform('units1', 0, 100, 20),
+    'units2': hp.quniform('units2', 0, 100, 20),
+    'units3': hp.quniform('units3', 0, 100, 20),
     'batch_size': hp.choice('batch_size', [128])
-    }"""
+    }
+"""
+
 
 def objective(params):
     for x in params.keys(): # if "units1":0 add one -> units1:1
@@ -284,8 +287,8 @@ def objective(params):
             params[x] = 5
     K.clear_session()
     layer1 = int(np.ceil((params['units1'] / 100) * 784))
-    layer2 = max(int(np.ceil((params['units2'] / 100) * layer1)), 24)
-    layer3 = max(int(np.ceil((params['units3'] / 100) * layer2)), 24)
+    layer2 = max(int(np.ceil((params['units2'] / 100) * layer1)), 30)
+    layer3 = max(int(np.ceil((params['units3'] / 100) * layer2)), 30)
     args.n_hiddens = (layer1, layer2, layer3)
     print("Params :")
     print("Params :" + str(layer1))
