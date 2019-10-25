@@ -3,20 +3,21 @@ import os
 sys.path.append(os.path.abspath(os.path.join('..' ,'..', 'src')))
 import pickle
 import importlib
-import matplotlib.pyplot as plt
+
 from list_best_performers import options, init
 from hyperopt import space_eval
 import utils
 # This import registers the 3D projection, but is otherwise unused.
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
-
+import matplotlib
+matplotlib.use("tkAgg")
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
 
-openF = "rbm_nodes_grid"#sys.argv[1]
+openF = "dbm_grid"#sys.argv[1]
 xaxe = "units1"#sys.argv[2]
 module = importlib.import_module("examples."+openF, "examples")
 init(openF)

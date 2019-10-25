@@ -307,6 +307,6 @@ def objective(params):
     return {'loss': score, 'status': STATUS_OK}
 
 
-while True:
-    boptimization.run_trials(script_name, space, objective)
+#while True:
+    #boptimization.run_trials(script_name, space, objective)
 

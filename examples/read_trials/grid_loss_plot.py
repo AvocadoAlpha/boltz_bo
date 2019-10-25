@@ -3,13 +3,14 @@ import os
 sys.path.append(os.path.abspath(os.path.join('..' ,'..', 'src')))
 import pickle
 import importlib
-import matplotlib.pyplot as plt
+
 from list_best_performers import options, init
 from hyperopt import space_eval
 import utils
-
-
-openF = "rbm_nodes_grid"#sys.argv[1]
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
+openF = "rbm_nodes_grid_2"#sys.argv[1]
 
 xaxe = "units1"#sys.argv[2]
 module = importlib.import_module("examples."+openF)
@@ -80,6 +81,6 @@ plt.grid()
 for i, txt in enumerate(n):
     ax.annotate(txt, (x[i], y[i]), textcoords="offset points", xytext=(0, 4), ha='center') # horizontal alignment can be left, right or center)
 """
-fig.savefig('../../plots/grid-loss-plot/'+str(openF)+'.png', dpi=200, bbox_inches="tight", pad_inches=1)
+fig.savefig('../../plots/grid-loss-plot/'+str(openF)+'.png', dpi=200, bbox_inches='tight')
 plt.show()
 print("Figure saved in figures/")

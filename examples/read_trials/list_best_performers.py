@@ -113,6 +113,7 @@ def fixed_5():
 options = { "grid_batch" : nodes_batch,
             "grid_nodes" :nodes_batch,
             "rbm_nodes_grid": nodes_batch,
+            "rbm_nodes_grid_2": nodes_batch,
             "grid_nodes_100" :nodes_batch,
             "grid_nodes_3" :nodes_batch,
             "grid_nodes_keras":nodes_batch,

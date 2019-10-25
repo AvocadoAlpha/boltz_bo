@@ -137,7 +137,7 @@ space = {
 
 space_str = """
 space = {
-    'units1': hp.quniform('units1', 0, 754, 10), 
+    'units1': hp.quniform('units1', 0, 2000, 10), 
     'batch_size': hp.choice('batch_size', [128])
     }"""
 

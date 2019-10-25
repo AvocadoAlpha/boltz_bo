@@ -168,7 +168,7 @@ parser.add_argument('--increase-n-gibbs-steps-every', type=int, default=20, meta
                     help='increase number of Gibbs steps every specified number of epochs for RBM #2')
 
 # common for RBMs and DBM
-parser.add_argument('--n-hiddens', type=int, default=(200, 30), metavar='N', nargs='+',
+parser.add_argument('--n-hiddens', type=int, default=(), metavar='N', nargs='+',
                     help='numbers of hidden units')
 parser.add_argument('--n-gibbs-steps', type=int, default=(1, 1, 1), metavar='N', nargs='+',
                     help='(initial) number of Gibbs steps for CD/PCD')
@@ -216,15 +216,15 @@ X_train, X_val, X_test = generate_data.generate_data_medium_2()
 X = np.concatenate((X_train, X_val))
 
 space = {
-    'units1': hp.quniform('units1', 0, 100, 5), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
-    'units2': hp.quniform('units2', 0, 100, 5), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
+    'units1': hp.quniform('units1', 0, 100, 10), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
+    'units2': hp.quniform('units2', 0, 100, 10), #implementation of hq.uniform is weird see github.com/hyperopt/hyperopt/issues/321
     'batch_size': hp.choice('batch_size', [128])
     }
 
 space_str = """
 space = {
-    'units1': hp.quniform('units1', 0, 100, 5), 
-    'units2': hp.quniform('units2', 0, 100, 5), 
+    'units1': hp.quniform('units1', 0, 100, 10), 
+    'units2': hp.quniform('units2', 0, 100, 10), 
     'batch_size': hp.choice('batch_size', [128])
     }"""
 

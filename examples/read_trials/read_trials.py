@@ -4,7 +4,7 @@ import numpy as np
 import importlib
 import matplotlib.pyplot as plt
 from hyperopt import space_eval
-openF = 'dbm_fixed_5'
+openF = 'rbm'
 #module = importlib.import_module('src.'+openF)
 
 trials = pickle.load(open('../trials/'+ openF, "rb"))

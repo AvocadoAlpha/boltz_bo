@@ -24,8 +24,9 @@ Links
 [1] http://www.cs.toronto.edu/~rsalakhu/DBM.html
 """
 print __doc__
-
+import generate_data
 import os
+from keras.losses import mean_squared_error
 import argparse
 import numpy as np
 from keras import regularizers
@@ -34,7 +35,7 @@ from keras.initializers import glorot_uniform
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from sklearn.metrics import accuracy_score
-
+import tensorflow as tf
 import env
 from boltzmann_machines import DBM
 from boltzmann_machines.rbm import BernoulliRBM
@@ -243,7 +244,7 @@ def main():
                         help='increase number of Gibbs steps every specified number of epochs for RBM #2')
 
     # common for RBMs and DBM
-    parser.add_argument('--n-hiddens', type=int, default=(512, 1024), metavar='N', nargs='+',
+    parser.add_argument('--n-hiddens', type=int, default=(745, 300), metavar='N', nargs='+',
                         help='numbers of hidden units')
     parser.add_argument('--n-gibbs-steps', type=int, default=(1, 1, 1), metavar='N', nargs='+',
                         help='(initial) number of Gibbs steps for CD/PCD')
@@ -251,7 +252,7 @@ def main():
                         help='(initial) learning rates')
     parser.add_argument('--epochs', type=int, default=(64, 120, 500), metavar='N', nargs='+',
                         help='number of epochs to train')
-    parser.add_argument('--batch-size', type=int, default=(), metavar='B', nargs='+',
+    parser.add_argument('--batch-size', type=int, default=(48, 48, 100), metavar='B', nargs='+',
                         help='input batch size for training, `--n-train` and `--n-val`' + \
                              'must be divisible by this number (for DBM)')
     parser.add_argument('--l2', type=float, default=(1e-3, 2e-4, 1e-7), metavar='L2', nargs='+',
@@ -318,18 +319,19 @@ def main():
 
     # prepare data (load + scale + split)
     print "\nPreparing data ...\n\n"
-    X, y = load_mnist(mode='train', path='../data/')
-    X /= 255.
-    RNG(seed=42).shuffle(X)
-    RNG(seed=42).shuffle(y)
-    n_train = min(len(X), args.n_train)
-    n_val = min(len(X), args.n_val)
-    X_train = X[:n_train]
-    y_train = y[:n_train]
-    X_val = X[-n_val:]
-    y_val = y[-n_val:]
-    X = np.concatenate((X_train, X_val))
+    #X, y = load_mnist(mode='train', path='../data/')
+    #X /= 255.
+    #RNG(seed=42).shuffle(X)
+    #RNG(seed=42).shuffle(y)
+   # n_train = min(len(X), args.n_train)
+    #n_val = min(len(X), args.n_val)
+    #X_train = X[:n_train]
+    #y_train = y[:n_train]
+    #X_val = X[-n_val:]
+    #y_val = y[-n_val:]
 
+    X_train, X_val, X_test = generate_data.generate_data_medium_2()
+    X = np.concatenate((X_train, X_val))
     # pre-train RBM #1
     rbm1 = make_rbm1(X, args)
 
@@ -354,11 +356,21 @@ def main():
     dbm = make_dbm((X_train, X_val), (rbm1, rbm2), (Q, G), args)
 
     # load test data
-    X_test, y_test = load_mnist(mode='test', path='../data/')
-    X_test /= 255.
+    #X_test, y_test = load_mnist(mode='test', path='../data/')
+    #X_test /= 255.
+
+    predictions = dbm.reconstruct(X_test)
+    print(predictions)
+
+    loss = tf.keras.backend.sum(mean_squared_error(tf.convert_to_tensor(X_test), tf.convert_to_tensor(predictions)))
+    sess = tf.Session()
+    score = round(sess.run(loss) / len(X_test), 4)
+    print(score)
 
     # discriminative fine-tuning: initialize MLP with
     # learned weights, add FC layer and train using backprop
+
+
     print "\nDiscriminative fine-tuning ...\n\n"
 
     W, hb = None, None
